@@ -1,0 +1,8 @@
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/UvgApplication.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/config/CorsConfig.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/config/SecurityConfig.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/controller/UserController.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/entity/User.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/repository/UserRepository.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/service/EmailService.java
+/Users/jacksonjosefreireruiz/Desktop/Arkamedy/ticuvgpro/SBVuetify/spring-boot3-crud-application/src/main/java/com/uvg/digital/service/UserService.java

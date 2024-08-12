@@ -1,0 +1,8 @@
+com/uvg/digital/UvgApplication.class
+com/uvg/digital/repository/UserRepository.class
+com/uvg/digital/config/SecurityConfig.class
+com/uvg/digital/entity/User.class
+com/uvg/digital/config/CorsConfig.class
+com/uvg/digital/service/UserService.class
+com/uvg/digital/controller/UserController.class
+com/uvg/digital/service/EmailService.class
