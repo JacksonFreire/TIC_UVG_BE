@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,9 @@ import com.uvg.digital.repository.UserRepository;
 
 @Service
 public class UserService {
+	
+	@Value("${app.base.url}")
+    private String baseUrl;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -45,7 +49,7 @@ public class UserService {
 
     private void sendVerificationEmail(User user, String token) {
         String subject = "Verificación de correo electrónico";
-        String verificationUrl = "http://localhost:8080/api/users/verify?token=" + token;
+        String verificationUrl = baseUrl + "/api/users/verify?token=" + token;
         String body = "Por favor, verifica tu correo electrónico haciendo clic en el siguiente enlace: " + verificationUrl;
         emailService.sendEmail(user.getEmail(), subject, body);
     }
