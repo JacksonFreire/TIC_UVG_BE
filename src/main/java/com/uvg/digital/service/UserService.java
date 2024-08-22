@@ -3,7 +3,6 @@ package com.uvg.digital.service;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,19 +10,17 @@ import org.springframework.stereotype.Service;
 import com.uvg.digital.entity.User;
 import com.uvg.digital.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class UserService {
 	
 	@Value("${app.base.url}")
     private String baseUrl;
 
-	@Autowired
 	private UserRepository userRepository;
-
-	@Autowired
 	private PasswordEncoder passwordEncoder;
-
-	@Autowired
 	private EmailService emailService; // Inyección de EmailService
 
 	public User registerUser(User user) {
