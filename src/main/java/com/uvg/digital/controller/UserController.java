@@ -37,7 +37,6 @@ public class UserController {
 	public ResponseEntity<User> registerUser(@ModelAttribute UserDTO userDTO,
 			@RequestPart("document") MultipartFile document, @RequestParam("recaptchaToken") String recaptchaToken) {
 		
-		
         boolean isCaptchaValid = recaptchaService.verifyRecaptcha(recaptchaToken);
         
         if (!isCaptchaValid) {
