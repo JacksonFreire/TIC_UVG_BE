@@ -17,7 +17,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins(baseUrlFe, arubaBaseUrl)
+		registry.addMapping("/api/**").allowedOrigins(baseUrlFe, arubaBaseUrl)
 				.allowedMethods("GET", "POST", "PUT", "DELETE").allowedHeaders("*").allowCredentials(true);
 	}
 }
