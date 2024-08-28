@@ -10,11 +10,14 @@ public class CorsConfig implements WebMvcConfigurer {
 	
 	@Value("${app.base.url.vue}")
 	private String baseUrlFe;
+	
+	@Value("${app.base.url.aruba}")
+    private String arubaBaseUrl;
 
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/api/**").allowedOrigins(baseUrlFe) // Cambia esto según la URL de tu frontend
+		registry.addMapping("/api/**").allowedOrigins(baseUrlFe, arubaBaseUrl)
 				.allowedMethods("GET", "POST", "PUT", "DELETE").allowedHeaders("*").allowCredentials(true);
 	}
 }
