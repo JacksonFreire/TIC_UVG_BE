@@ -27,14 +27,17 @@ public class PasswordResetService {
     
     @Value("${app.base.url}")
     private String baseUrl;
-
+    
+    @Value("${app.base.url.vue}")
+    private String baseUrlFe;
+    
     public void initiatePasswordReset(String email) {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken(null, token, user, LocalDateTime.now().plusHours(24));
         tokenRepository.save(resetToken);
-        String resetLink = baseUrl + "/api/auth/reset-password?token=" + token;
+        String resetLink = baseUrlFe + "/reset-password?token=" + token;
         emailService.sendEmail(email, "Password Reset Request", "Click the link to reset your password: " + resetLink);
     }
     
