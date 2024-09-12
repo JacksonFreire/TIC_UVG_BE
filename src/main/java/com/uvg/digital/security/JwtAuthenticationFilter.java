@@ -28,16 +28,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("Ejecutando JwtAuthenticationFilter para la solicitud: " + request.getRequestURI());
+        
         String jwt = parseJwt(request);
         if (jwt != null && jwtTokenService.validateToken(jwt)) {
+            System.out.println("Token JWT validado correctamente.");
+
             String username = jwtTokenService.getUsernameFromToken(jwt);
+            System.out.println("Usuario extraído del token: " + username);
+            
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            System.out.println("Detalles del usuario cargados: " + userDetails);
+            
             if (userDetails != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                System.out.println("Cargando detalles del usuario: " + username);
+                System.out.println("Roles del usuario: " + userDetails.getAuthorities());
+                
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("Autenticación establecida para el usuario: " + username);
+            } else {
+                System.out.println("No se pudo establecer la autenticación para el usuario: " + username);
             }
+        } else {
+            System.out.println("Token JWT no válido o no presente");
         }
         filterChain.doFilter(request, response);
     }
@@ -49,4 +65,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
 }

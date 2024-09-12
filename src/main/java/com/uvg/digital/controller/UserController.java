@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.uvg.digital.entity.User;
 import com.uvg.digital.model.UserDTO;
-import com.uvg.digital.service.RecaptchaService;
 import com.uvg.digital.service.UserService;
 
 @RestController
@@ -23,29 +22,13 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private RecaptchaService recaptchaService;
-	
 	
 	@PostMapping("/register")
     public ResponseEntity<User> registerUser(@ModelAttribute UserDTO userDTO, @RequestPart("document") MultipartFile document) {
         User registeredUser = userService.registerUser(userDTO, document);
         return ResponseEntity.ok(registeredUser);
     }
-	
-	@PostMapping("/registercaptcha")
-	public ResponseEntity<User> registerUser(@ModelAttribute UserDTO userDTO,
-			@RequestPart("document") MultipartFile document, @RequestParam("recaptchaToken") String recaptchaToken) {
-		
-        boolean isCaptchaValid = recaptchaService.verifyRecaptcha(recaptchaToken);
-        
-        if (!isCaptchaValid) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-		User registeredUser = userService.registerUser(userDTO, document);
-		return ResponseEntity.ok(registeredUser);
-	}
+
 
 	@GetMapping("/verify")
 	public ResponseEntity<String> verifyUser(@RequestParam("token") String token) {
