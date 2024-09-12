@@ -23,7 +23,7 @@ public class AuthenticationService {
 
     public String authenticate(String username, String password) {
         
-    	 // Aquí comparas la contraseña proporcionada con la contraseña codificada
+    	 //Comparas la contraseña proporcionada con la contraseña codificada
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
         
