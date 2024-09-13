@@ -29,8 +29,8 @@ public class NotificationService {
             subject = "Confirmación de Inscripción al Evento: " + event.getName();
             body = "Estimado " + user.getFirstName() + ",\n\n" +
                    "Te has inscrito exitosamente en el evento: " + event.getName() + ".\n" +
-                   "Fecha del evento: " + event.getEventDate() + "\n" +
-                   "Lugar: " + event.getEventPlace() + "\n\n" +
+                   "Fecha del evento: " + event.getStartDate() + "\n" +
+                   "Lugar: " + event.getLocation() + "\n\n" +
                    "Gracias por ser parte de nuestra comunidad.\n";
         } else {
             subject = "Confirmación de Inscripción";

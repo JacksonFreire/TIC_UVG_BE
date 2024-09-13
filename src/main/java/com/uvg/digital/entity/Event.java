@@ -1,40 +1,53 @@
 package com.uvg.digital.entity;
 
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.sql.Types;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
 
 @Data
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "events")
 public class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "event_date", nullable = false)
-    private LocalDateTime eventDate;
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime startDate;
 
-    @Column(name = "event_place", length = 255)
-    private String eventPlace;
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime endDate;
+
+    @Column(length = 255)
+    private String location;
+
+    @Column(nullable = false)
+    private Double price;
+
+    @Lob
+    @JdbcTypeCode(Types.BINARY)
+    @Column(name = "image", columnDefinition = "BYTEA")
+    private byte[] image;
+
+    @Column(length = 50)
+    private String category;
+    
+    @Column(name = "additional_details", columnDefinition = "TEXT")
+    private String additionalDetails;
+    
+    @Column(name = "is_visible", nullable = false)
+    private Boolean isVisible = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

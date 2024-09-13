@@ -1,11 +1,15 @@
 package com.uvg.digital.service;
 
-import com.uvg.digital.entity.Event;
-import com.uvg.digital.repository.EventRepository;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.uvg.digital.entity.Event;
+import com.uvg.digital.repository.EventRepository;
 
 @Service
 public class EventService {
@@ -13,7 +17,12 @@ public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+    public Page<Event> getAllVisibleEvents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return eventRepository.findByIsVisibleTrueOrderByStartDateAsc(pageable);
+    }
+    
+    public Optional<Event> getEventById(Long id) {
+        return eventRepository.findById(id);
     }
 }
