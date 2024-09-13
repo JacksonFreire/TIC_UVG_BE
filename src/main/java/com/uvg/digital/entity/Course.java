@@ -63,6 +63,9 @@ public class Course {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    @Column(name = "is_visible", nullable = false)
+    private Boolean isVisible = true;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "courses_instructor_id_fkey"))

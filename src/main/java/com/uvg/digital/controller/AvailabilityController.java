@@ -23,9 +23,10 @@ public class AvailabilityController {
 	private EventService eventService;
 
 	@GetMapping("/courses")
-	public ResponseEntity<List<CourseDTO>> getAllAvailableCourses() {
-		List<CourseDTO> courseDTOs = courseService.getAllCourses();
-		return ResponseEntity.ok(courseDTOs);
+	public ResponseEntity<Page<CourseDTO>> getAllVisibleCourses(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "6") int size) {
+		Page<CourseDTO> courses = courseService.getAllVisibleCourses(page, size);
+		return ResponseEntity.ok(courses);
 	}
 
 	@GetMapping("/courses/{id}")
