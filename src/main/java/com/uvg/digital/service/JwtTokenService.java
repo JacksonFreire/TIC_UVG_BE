@@ -1,17 +1,23 @@
 package com.uvg.digital.service;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
-import java.util.Date;
-import java.util.stream.Collectors;
+import com.uvg.digital.entity.User;
+import com.uvg.digital.repository.UserRepository;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtTokenService {
@@ -21,6 +27,9 @@ public class JwtTokenService {
 
     @Value("${app.jwt-expiration-milliseconds}")
     private long jwtExpirationDate;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     private Key key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
@@ -28,6 +37,10 @@ public class JwtTokenService {
 
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        
+        Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+        
+        String userId = String.valueOf(user.get().getId());
         String username = userDetails.getUsername();
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
@@ -40,6 +53,7 @@ public class JwtTokenService {
 
         return Jwts.builder()
             .setSubject(username)
+            .claim("userId", userId)
             .claim("role", roles)
             .setIssuedAt(currentDate)
             .setExpiration(expireDate)

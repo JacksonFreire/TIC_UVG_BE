@@ -13,4 +13,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 	boolean existsByUserAndCourse(User user, Course course);
 
 	boolean existsByUserAndEvent(User user, Event event);
+	
+	boolean existsByCourseIdAndUserId(Long courseId, Long userId);
+	
+    boolean existsByEventIdAndUserId(Long eventId, Long userId);
 }

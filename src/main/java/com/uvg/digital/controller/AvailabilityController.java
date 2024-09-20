@@ -1,16 +1,20 @@
 package com.uvg.digital.controller;
 
-import com.uvg.digital.model.CourseDTO;
-import com.uvg.digital.entity.Event;
-import com.uvg.digital.service.CourseService;
-import com.uvg.digital.service.EventService;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+import com.uvg.digital.entity.Event;
+import com.uvg.digital.model.CourseDTO;
+import com.uvg.digital.service.CourseService;
+import com.uvg.digital.service.EventService;
 
 @RestController
 @RequestMapping("/api/available")
