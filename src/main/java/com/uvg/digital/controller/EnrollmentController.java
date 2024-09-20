@@ -15,7 +15,7 @@ public class EnrollmentController {
 	@Autowired
 	private EnrollmentService enrollmentService;
 
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasRole('USER')")
 	@PostMapping("/course/{courseId}")
 	public ResponseEntity<String> enrollUserToCourse(@RequestBody EnrollmentRequest enrollmentRequest,
 			@PathVariable Long courseId) {
@@ -27,21 +27,10 @@ public class EnrollmentController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-	/*
-	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/event/{eventId}")
-	public ResponseEntity<String> enrollUserToEvent(@RequestParam Long userId, @PathVariable Long eventId) {
-		try {
-			enrollmentService.enrollUserToEvent(userId, eventId);
-			return ResponseEntity.ok("Usuario inscrito exitosamente en el evento");
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-	}*/
-	
-	@PreAuthorize("isAuthenticated()")
+
+	@PreAuthorize("hasRole('USER')")
     @PostMapping("/event/{eventId}")
-    public ResponseEntity<String> enrollUserInEvent(
+    public ResponseEntity<String> enrollUserToEvent(
             @PathVariable Long eventId,
             @RequestBody EnrollmentRequest request) {
         enrollmentService.enrollUserToEvent(request.getUserId(),eventId);
@@ -50,7 +39,7 @@ public class EnrollmentController {
     
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/isEnrolled")
-	public ResponseEntity<Boolean> isUserEnrolled(@RequestParam Long courseId, @RequestParam Long userId) {
+	public ResponseEntity<Boolean> isUserEnrolledInCouruse(@RequestParam Long courseId, @RequestParam Long userId) {
 		boolean isEnrolled = enrollmentService.isUserEnrolledInCourse(courseId, userId);
 		return ResponseEntity.ok(isEnrolled);
 	}
