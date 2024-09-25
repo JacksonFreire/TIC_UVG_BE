@@ -7,14 +7,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uvg.digital.entity.Event;
 import com.uvg.digital.model.CourseDTO;
+import com.uvg.digital.model.EmailRequest;
 import com.uvg.digital.service.CourseService;
+import com.uvg.digital.service.EmailService;
 import com.uvg.digital.service.EventService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/available")
@@ -25,6 +31,9 @@ public class AvailabilityController {
 
 	@Autowired
 	private EventService eventService;
+	
+	@Autowired
+    private EmailService emailService;
 
 	@GetMapping("/courses")
 	public ResponseEntity<Page<CourseDTO>> getAllVisibleCourses(@RequestParam(defaultValue = "0") int page,
@@ -55,4 +64,17 @@ public class AvailabilityController {
 		Optional<Event> event = eventService.getEventById(id);
 		return event.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 	}
+	
+	@PostMapping("/send")
+    public ResponseEntity<String> sendEmail(@Valid @RequestBody EmailRequest request) {
+  
+        String body = String.format("Nombre: %s\nEmail: %s\nMensaje: %s",
+                request.getName(), request.getEmail(), request.getMessage());
+
+        emailService.sendEmail("info@univeritasgroup.com",
+                "Nuevo mensaje desde el formulario de contacto",
+                body);
+
+        return ResponseEntity.ok("Correo enviado correctamente");
+    }
 }
