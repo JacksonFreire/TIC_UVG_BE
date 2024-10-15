@@ -81,4 +81,8 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDate.now();
     }
+    
+    public Boolean isVerified() {
+        return verified;
+    }
 }

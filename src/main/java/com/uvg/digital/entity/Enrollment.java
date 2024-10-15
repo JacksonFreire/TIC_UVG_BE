@@ -47,6 +47,9 @@ public class Enrollment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name= "comments")
+    private String comments;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
