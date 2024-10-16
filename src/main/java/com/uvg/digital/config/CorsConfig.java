@@ -7,17 +7,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
-	
-	@Value("${app.base.url.vue}")
-	private String baseUrlFe;
-	
-	@Value("${app.base.url.aruba}")
+
+    @Value("${app.base.url.vue}")
+    private String baseUrlFe;
+
+    @Value("${app.base.url.aruba}")
     private String arubaBaseUrl;
 
-
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins(baseUrlFe, arubaBaseUrl)
-				.allowedMethods("GET", "POST", "PUT", "DELETE").allowedHeaders("*").allowCredentials(true);
-	}
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")  // Permitir solo las URLs que empiezan con /api
+                .allowedOrigins(baseUrlFe, arubaBaseUrl)  // Permitir solo estos dos orígenes
+                .allowedMethods("GET", "POST", "PUT", "DELETE")  // Permitir estos métodos
+                .allowedHeaders("Authorization", "Content-Type")  // Solo permitir ciertos encabezados
+                .allowCredentials(true);  // Permitir credenciales si es necesario
+    }
 }

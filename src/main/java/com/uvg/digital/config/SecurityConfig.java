@@ -12,43 +12,41 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final JwtAuthenticationFilter jwtAuthFilter;
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
-	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
-				// Endpoints públicos
-				.requestMatchers("/api/users/register", "/api/users/verify**", "/api/auth/**", "/api/available/**")
-				.permitAll()
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+            // Permitir las solicitudes de preflight (OPTIONS)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Endpoints públicos
+                .requestMatchers("/api/users/register", "/api/users/verify**", "/api/auth/**", "/api/available/**").permitAll()
+                // Endpoints protegidos para usuarios con rol USER
+                .requestMatchers("/api/enrollments/course/*", "/api/enrollments/event/*").hasAuthority("USER")
+                // Endpoints protegidos para administradores con rol ADMIN
+                .requestMatchers("/api/enrollments/admin/course/*", "/api/enrollments/admin/event/*").hasAuthority("ADMIN")
+                // Otros endpoints requieren autenticación
+                .anyRequest().authenticated())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-				// Endpoints de inscripción accesibles solo por usuarios con rol USER
-				.requestMatchers("/api/enrollments/course/*", "/api/enrollments/event/*").hasAuthority("USER")
+        return http.build();
+    }
 
-				// Endpoints accesibles solo por administradores con rol ADMIN para ver y
-				// filtrar inscripciones
-				.requestMatchers("/api/enrollments/admin/course/*", "/api/enrollments/admin/event/*")
-				.hasAuthority("ADMIN")
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
 
-				// Otros endpoints requieren autenticación
-				.anyRequest().authenticated())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-		return http.build();
-	}
-
-	@Bean
-	AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-		return authConfig.getAuthenticationManager();
-	}
-
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
