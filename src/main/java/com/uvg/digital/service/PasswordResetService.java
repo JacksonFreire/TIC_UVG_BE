@@ -22,7 +22,7 @@ public class PasswordResetService {
 
     private final PasswordResetTokenRepository tokenRepository;
     private final UserRepository userRepository;
-    private final EmailService emailService;
+    private final AzureEmailService emailService;
     private final PasswordEncoder passwordEncoder;
     
     @Value("${app.base.url}")

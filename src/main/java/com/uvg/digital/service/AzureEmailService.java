@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmailService {
+public class AzureEmailService {
 	
 	private final EmailClient emailClient;
     private final String senderAddress;
 
-    public EmailService(
+    public AzureEmailService(
             @Value("${azure.communication.email.connection-string}") String connectionString,
             @Value("${azure.communication.email.sender}") String senderAddress) {
         this.emailClient = new EmailClientBuilder()

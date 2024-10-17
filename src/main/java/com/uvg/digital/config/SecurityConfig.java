@@ -23,11 +23,12 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-            // Permitir las solicitudes de preflight (OPTIONS)
+            // Permitir el acceso a todos los servicios del controlador ActivityManagementController
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/activities/**").permitAll()
                 // Endpoints públicos
-                .requestMatchers("/api/users/register", "/api/users/verify**", "/api/auth/**", "/api/available/**").permitAll()
+                .requestMatchers("/api/users/register","/api/users/verify**","/api/users/send","/api/auth/**").permitAll()
                 // Endpoints protegidos para usuarios con rol USER
                 .requestMatchers("/api/enrollments/course/*", "/api/enrollments/event/*").hasAuthority("USER")
                 // Endpoints protegidos para administradores con rol ADMIN

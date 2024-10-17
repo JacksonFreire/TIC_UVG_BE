@@ -29,8 +29,8 @@ public class Curriculum {
     @Column(length = 2000)
     private String content;
 
-    @Column(name = "order")
-    private Integer order;
+    @Column(name = "lesson_order")
+    private Integer lessonOrder;
 
     @Column(length = 50)
     private String duration;

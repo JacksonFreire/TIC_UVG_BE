@@ -25,7 +25,7 @@ public class UserService {
 
 	private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final AzureEmailService emailService;
 
 	public User registerUser(UserDTO userDTO, MultipartFile document) {
 		User user = new User();

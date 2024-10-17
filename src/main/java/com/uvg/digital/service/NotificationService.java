@@ -8,9 +8,9 @@ import com.uvg.digital.entity.Event;
 @Service
 public class NotificationService {
 
-    private final EmailService emailService;
+    private final AzureEmailService emailService;
 
-    public NotificationService(EmailService emailService) {
+    public NotificationService(AzureEmailService emailService) {
         this.emailService = emailService;
     }
 
