@@ -10,4 +10,7 @@ import java.util.List;
 public interface CurriculumRepository extends JpaRepository<Curriculum, Long> {
     // Método personalizado para obtener el currículo de un curso por su ID
     List<Curriculum> findByCourseId(Long courseId);
+
+    // Método personalizado para eliminar currículos por el ID del curso
+    void deleteByCourseId(Long courseId);
 }

@@ -15,7 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -81,10 +83,11 @@ public class CourseService {
         
         return convertToDto(savedCourse, savedCourse.getInstructor(), curriculumRepository.findByCourseId(savedCourse.getId()));
     }
-
-    // Editar un curso existente
+    
+    @Transactional
     public Optional<CourseDTO> updateCourse(Long id, CourseDTO courseDTO) {
         return courseRepository.findById(id).map(course -> {
+            // Actualizar datos del curso
             course.setName(courseDTO.getName());
             course.setDescription(courseDTO.getDescription());
             course.setCategory(courseDTO.getCategory());
@@ -94,20 +97,42 @@ public class CourseService {
             course.setDuration(courseDTO.getDuration());
             course.setLevel(courseDTO.getLevel());
             course.setEventPlace(courseDTO.getEventPlace());
-            course.setImage(courseDTO.getImage() != null ? Base64.getDecoder().decode(courseDTO.getImage()) : null);
+
+            // Decodificar la imagen de Base64 si está presente
+            if (courseDTO.getImage() != null && !courseDTO.getImage().isEmpty()) {
+                try {
+                    // Remover el prefijo de datos (ejemplo: data:image/jpeg;base64,)
+                    String base64Image = courseDTO.getImage();
+                    if (base64Image.startsWith("data:image")) {
+                        int commaIndex = base64Image.indexOf(",") + 1;
+                        base64Image = base64Image.substring(commaIndex);
+                    }
+                    byte[] decodedImage = Base64.getDecoder().decode(base64Image);
+                    course.setImage(decodedImage);
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException("Error al decodificar la imagen: " + e.getMessage());
+                }
+            } else {
+                course.setImage(null); // Si no hay imagen, asignar null
+            }
+
             course.setStartDate(courseDTO.getStartDate());
             course.setEndDate(courseDTO.getEndDate());
             course.setUpdatedAt(courseDTO.getUpdatedAt());
-            
+
             // Actualizar el instructor del curso
             if (courseDTO.getInstructor() != null) {
                 Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
                 instructorOpt.ifPresent(course::setInstructor);
             }
-            
+
+            // Guardar el curso actualizado
             Course updatedCourse = courseRepository.save(course);
 
-            // Actualizar currículos asociados al curso
+            // Eliminar currículos anteriores asociados al curso
+            curriculumRepository.deleteByCourseId(updatedCourse.getId());
+
+            // Guardar los nuevos currículos
             if (courseDTO.getCurriculums() != null) {
                 List<Curriculum> curriculums = courseDTO.getCurriculums().stream()
                         .map(curriculumDTO -> {
@@ -125,11 +150,12 @@ public class CourseService {
                         }).collect(Collectors.toList());
                 curriculumRepository.saveAll(curriculums);
             }
-            
+
+            // Retornar el DTO actualizado del curso
             return convertToDto(updatedCourse, updatedCourse.getInstructor(), curriculumRepository.findByCourseId(updatedCourse.getId()));
         });
     }
-
+    
     // Eliminación lógica de un curso por ID
     public boolean deleteCourse(Long id) {
         return courseRepository.findById(id).map(course -> {
@@ -196,18 +222,38 @@ public class CourseService {
 
     // Convertir entidad completa a DTO
     private CourseDTO convertToDto(Course course, Instructor instructor, List<Curriculum> curriculums) {
-        String imageBase64 = course.getImage() != null ? Base64.getEncoder().encodeToString(course.getImage()) : null;
-        String instructorImageBase64 = instructor != null && instructor.getProfileImage() != null ? 
-                                        Base64.getEncoder().encodeToString(instructor.getProfileImage()) : null;
+        String imageBase64 = null;
+        try {
+            if (course.getImage() != null) {
+                imageBase64 = Base64.getEncoder().encodeToString(course.getImage());
+            }
+        } catch (Exception e) {
+            // Manejo de error de codificación de imagen
+            System.err.println("Error al codificar la imagen del curso: " + e.getMessage());
+        }
 
-        InstructorDTO instructorDTO = instructor != null ? new InstructorDTO(
-                instructor.getId(),
-                instructor.getName(),
-                instructor.getBio(),
-                instructorImageBase64
-        ) : null;
+        String instructorImageBase64 = null;
+        try {
+            if (instructor != null && instructor.getProfileImage() != null) {
+                instructorImageBase64 = Base64.getEncoder().encodeToString(instructor.getProfileImage());
+            }
+        } catch (Exception e) {
+            // Manejo de error de codificación de imagen del instructor
+            System.err.println("Error al codificar la imagen del instructor: " + e.getMessage());
+        }
 
-        List<CurriculumDTO> curriculumDTOs = curriculums.stream()
+        InstructorDTO instructorDTO = null;
+        if (instructor != null) {
+            instructorDTO = new InstructorDTO(
+                    instructor.getId(),
+                    instructor.getName(),
+                    instructor.getBio(),
+                    instructorImageBase64
+            );
+        }
+
+        // Manejo seguro de curriculums
+        List<CurriculumDTO> curriculumDTOs = curriculums != null ? curriculums.stream()
                 .map(curriculum -> new CurriculumDTO(
                         curriculum.getId(),
                         curriculum.getSectionName(),
@@ -219,8 +265,9 @@ public class CourseService {
                         curriculum.getResourceLink(),
                         curriculum.getIsMandatory()
                 ))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : new ArrayList<>();
 
+        // Devolver el DTO del curso
         return new CourseDTO(
             course.getId(),
             course.getName(),
