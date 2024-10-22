@@ -34,9 +34,9 @@ public class CourseService {
     private InstructorRepository instructorRepository;
 
     @Autowired
-    private CurriculumRepository curriculumRepository;
+    private CurriculumRepository curriculumRepository;  
 
-    // Crear un nuevo curso
+    @Transactional
     public CourseDTO createCourse(CourseDTO courseDTO) {
         Course course = new Course();
         course.setName(courseDTO.getName());
@@ -48,18 +48,36 @@ public class CourseService {
         course.setDuration(courseDTO.getDuration());
         course.setLevel(courseDTO.getLevel());
         course.setEventPlace(courseDTO.getEventPlace());
-        course.setImage(courseDTO.getImage() != null ? Base64.getDecoder().decode(courseDTO.getImage()) : null);
+
+        // Decodificar la imagen de Base64 si está presente
+        if (courseDTO.getImage() != null && !courseDTO.getImage().isEmpty()) {
+            try {
+                // Remover el prefijo de datos si está presente (ejemplo: data:image/jpeg;base64,)
+                String base64Image = courseDTO.getImage();
+                if (base64Image.startsWith("data:image")) {
+                    int commaIndex = base64Image.indexOf(",") + 1;
+                    base64Image = base64Image.substring(commaIndex); // Remover el prefijo
+                }
+                byte[] decodedImage = Base64.getDecoder().decode(base64Image);
+                course.setImage(decodedImage);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Error al decodificar la imagen: " + e.getMessage());
+            }
+        } else {
+            course.setImage(null);
+        }
+
         course.setStartDate(courseDTO.getStartDate());
         course.setEndDate(courseDTO.getEndDate());
         course.setCreatedAt(courseDTO.getCreatedAt());
         course.setUpdatedAt(courseDTO.getUpdatedAt());
-        
+
         // Establecer el instructor del curso
         if (courseDTO.getInstructor() != null) {
             Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
             instructorOpt.ifPresent(course::setInstructor);
         }
-        
+
         Course savedCourse = courseRepository.save(course);
 
         // Guardar currículos asociados al curso
@@ -80,9 +98,10 @@ public class CourseService {
                     }).collect(Collectors.toList());
             curriculumRepository.saveAll(curriculums);
         }
-        
+
         return convertToDto(savedCourse, savedCourse.getInstructor(), curriculumRepository.findByCourseId(savedCourse.getId()));
     }
+
     
     @Transactional
     public Optional<CourseDTO> updateCourse(Long id, CourseDTO courseDTO) {
