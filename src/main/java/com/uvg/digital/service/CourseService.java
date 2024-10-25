@@ -4,6 +4,7 @@ import com.uvg.digital.entity.Course;
 import com.uvg.digital.entity.Curriculum;
 import com.uvg.digital.entity.Instructor;
 import com.uvg.digital.model.CourseDTO;
+import com.uvg.digital.model.CourseListDTO;
 import com.uvg.digital.model.CurriculumDTO;
 import com.uvg.digital.model.InstructorDTO;
 import com.uvg.digital.repository.CourseRepository;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,10 +187,16 @@ public class CourseService {
     }
 
     // Método para obtener cursos paginados y filtrados por visibilidad
+    /*
     public Page<CourseDTO> getAllVisibleCourses(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Course> courses = courseRepository.findByIsVisibleTrueOrderByStartDateAsc(pageable);
         return courses.map(this::convertToBasicDto);
+    }*/
+    
+    public Page<CourseListDTO> getAllVisibleCourses(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
+        return courseRepository.findAllVisibleCourses(pageable);
     }
 
     public CourseDTO getCourseDetailsById(Long id) {

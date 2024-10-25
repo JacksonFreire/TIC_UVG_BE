@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.uvg.digital.model.CourseDTO;
+import com.uvg.digital.model.CourseListDTO;
 import com.uvg.digital.model.EventDTO;
 import com.uvg.digital.service.CourseService;
 import com.uvg.digital.service.EventService;
@@ -36,9 +37,9 @@ public class ActivityManagementController {
 
     // Obtener todos los cursos visibles con paginación
     @GetMapping("/courses/list")
-    public ResponseEntity<Page<CourseDTO>> getAllVisibleCourses(@RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "6") int size) {
-        Page<CourseDTO> courses = courseService.getAllVisibleCourses(page, size);
+    public ResponseEntity<Page<CourseListDTO>> getAllVisibleCourses(@RequestParam(defaultValue = "0") int page,
+                                                                    @RequestParam(defaultValue = "6") int size) {
+        Page<CourseListDTO> courses = courseService.getAllVisibleCourses(page, size);
         return ResponseEntity.ok(courses);
     }
 
