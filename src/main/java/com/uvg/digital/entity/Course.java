@@ -66,6 +66,9 @@ public class Course {
     
     @Column(name = "is_visible", nullable = false)
     private Boolean isVisible = true;
+    
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "courses_instructor_id_fkey"))

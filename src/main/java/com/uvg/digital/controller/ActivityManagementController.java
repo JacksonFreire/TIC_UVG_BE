@@ -34,7 +34,8 @@ public class ActivityManagementController {
     
     @Autowired
 	private EventService eventService;
-
+    
+    
     // Obtener todos los cursos visibles con paginación
     @GetMapping("/courses/list")
     public ResponseEntity<Page<CourseListDTO>> getAllVisibleCourses(@RequestParam(defaultValue = "0") int page,
