@@ -1,14 +1,21 @@
 package com.uvg.digital.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Types;
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.JdbcTypeCode;
 
 @Data
 @Entity
@@ -52,11 +59,6 @@ public class Course {
 
     @Column(name = "event_place", length = 255)
     private String eventPlace;
-
-    @Lob
-    @JdbcTypeCode(Types.BINARY)  // Usar JdbcTypeCode para especificar que es un tipo binario
-    @Column(name = "image", columnDefinition = "BYTEA")
-    private byte[] image;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

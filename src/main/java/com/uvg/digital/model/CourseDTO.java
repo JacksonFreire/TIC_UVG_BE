@@ -21,7 +21,7 @@ public class CourseDTO {
 	    private String duration;
 	    private String level;
 	    private String eventPlace;
-	    private String image; // Imagen en base64
+	    private String imageUrl; // Imagen en base64
 	    private InstructorDTO instructor; // Detalles del instructor
 	    private LocalDateTime startDate;
 	    private LocalDateTime endDate;

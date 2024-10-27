@@ -29,248 +29,227 @@ import com.uvg.digital.repository.InstructorRepository;
 
 import lombok.RequiredArgsConstructor;
 
-
 @Service
 @RequiredArgsConstructor
 public class CourseService {
 
-    @Autowired
-    private final CourseRepository courseRepository;
+	@Autowired
+	private final CourseRepository courseRepository;
 
-    @Autowired
-    private InstructorRepository instructorRepository;
+	@Autowired
+	private InstructorRepository instructorRepository;
 
-    @Autowired
-    private CurriculumRepository curriculumRepository;
+	@Autowired
+	private CurriculumRepository curriculumRepository;
 
-    @Autowired
-    private BlobStorageService blobStorageService;
+	@Autowired
+	private BlobStorageService blobStorageService;
 
-    @Transactional
-    public CourseDTO createCourse(CourseDTO courseDTO) {
-        Course course = new Course();
-        course.setName(courseDTO.getName());
-        course.setDescription(courseDTO.getDescription());
-        course.setCategory(courseDTO.getCategory());
-        course.setLessonsCount(courseDTO.getLessonsCount());
-        course.setStudentsCount(courseDTO.getStudentsCount());
-        course.setPrice(courseDTO.getPrice());
-        course.setDuration(courseDTO.getDuration());
-        course.setLevel(courseDTO.getLevel());
-        course.setEventPlace(courseDTO.getEventPlace());
+	@Transactional
+	public CourseDTO createCourse(CourseDTO courseDTO) {
+		Course course = new Course();
+		course.setName(courseDTO.getName());
+		course.setDescription(courseDTO.getDescription());
+		course.setCategory(courseDTO.getCategory());
+		course.setLessonsCount(courseDTO.getLessonsCount());
+		course.setStudentsCount(courseDTO.getStudentsCount());
+		course.setPrice(courseDTO.getPrice());
+		course.setDuration(courseDTO.getDuration());
+		course.setLevel(courseDTO.getLevel());
+		course.setEventPlace(courseDTO.getEventPlace());
 
-        // Subir la imagen a Blob Storage y obtener la URL
-        if (courseDTO.getImage() != null && !courseDTO.getImage().isEmpty()) {
-            try {
-                String base64Image = courseDTO.getImage();
-                if (base64Image.startsWith("data:image")) {
-                    int commaIndex = base64Image.indexOf(",") + 1;
-                    base64Image = base64Image.substring(commaIndex);
-                }
-                byte[] decodedImage = Base64.getDecoder().decode(base64Image);
-                String imageUrl = blobStorageService.uploadImage(decodedImage, "imagenes-cursos", "curso-" + courseDTO.getName() + ".jpg");
-                course.setImageUrl(imageUrl); // Guardar solo la URL de la imagen
-            } catch (Exception e) {
-                throw new RuntimeException("Error al cargar la imagen en Blob Storage: " + e.getMessage());
-            }
-        }
+		// Subir la imagen a Blob Storage y obtener la URL
+		if (courseDTO.getImageUrl() != null && !courseDTO.getImageUrl().isEmpty()) {
+			try {
+				String base64Image = courseDTO.getImageUrl();
+				if (base64Image.startsWith("data:image")) {
+					int commaIndex = base64Image.indexOf(",") + 1;
+					base64Image = base64Image.substring(commaIndex);
+				}
+				byte[] decodedImage = Base64.getDecoder().decode(base64Image);
+				String imageUrl = blobStorageService.uploadImage(decodedImage, "imagenes-cursos",
+						"curso-" + courseDTO.getName() + ".jpg");
+				course.setImageUrl(imageUrl); // Guardar solo la URL de la imagen
+			} catch (Exception e) {
+				throw new RuntimeException("Error al cargar la imagen en Blob Storage: " + e.getMessage());
+			}
+		}
 
-        course.setStartDate(courseDTO.getStartDate());
-        course.setEndDate(courseDTO.getEndDate());
-        course.setCreatedAt(courseDTO.getCreatedAt());
-        course.setUpdatedAt(courseDTO.getUpdatedAt());
+		course.setStartDate(courseDTO.getStartDate());
+		course.setEndDate(courseDTO.getEndDate());
+		course.setCreatedAt(courseDTO.getCreatedAt());
+		course.setUpdatedAt(courseDTO.getUpdatedAt());
 
-        // Establecer el instructor del curso
-        if (courseDTO.getInstructor() != null) {
-            Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
-            instructorOpt.ifPresent(course::setInstructor);
-        }
+		// Establecer el instructor del curso
+		if (courseDTO.getInstructor() != null) {
+			Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
+			instructorOpt.ifPresent(course::setInstructor);
+		}
 
-        Course savedCourse = courseRepository.save(course);
+		Course savedCourse = courseRepository.save(course);
 
-        // Guardar currículos asociados al curso
-        if (courseDTO.getCurriculums() != null) {
-            List<Curriculum> curriculums = courseDTO.getCurriculums().stream()
-                    .map(curriculumDTO -> {
-                        Curriculum curriculum = new Curriculum();
-                        curriculum.setCourse(savedCourse);
-                        curriculum.setSectionName(curriculumDTO.getSectionName());
-                        curriculum.setLessonName(curriculumDTO.getLessonName());
-                        curriculum.setContent(curriculumDTO.getContent());
-                        curriculum.setLessonOrder(curriculumDTO.getOrder());
-                        curriculum.setDuration(curriculumDTO.getDuration());
-                        curriculum.setType(curriculumDTO.getType());
-                        curriculum.setResourceLink(curriculumDTO.getResourceLink());
-                        curriculum.setIsMandatory(curriculumDTO.getIsMandatory());
-                        return curriculum;
-                    }).collect(Collectors.toList());
-            curriculumRepository.saveAll(curriculums);
-        }
+		// Guardar currículos asociados al curso
+		if (courseDTO.getCurriculums() != null) {
+			List<Curriculum> curriculums = courseDTO.getCurriculums().stream().map(curriculumDTO -> {
+				Curriculum curriculum = new Curriculum();
+				curriculum.setCourse(savedCourse);
+				curriculum.setSectionName(curriculumDTO.getSectionName());
+				curriculum.setLessonName(curriculumDTO.getLessonName());
+				curriculum.setContent(curriculumDTO.getContent());
+				curriculum.setLessonOrder(curriculumDTO.getOrder());
+				curriculum.setDuration(curriculumDTO.getDuration());
+				curriculum.setType(curriculumDTO.getType());
+				curriculum.setResourceLink(curriculumDTO.getResourceLink());
+				curriculum.setIsMandatory(curriculumDTO.getIsMandatory());
+				return curriculum;
+			}).collect(Collectors.toList());
+			curriculumRepository.saveAll(curriculums);
+		}
 
-        return convertToDto(savedCourse, savedCourse.getInstructor(), curriculumRepository.findByCourseId(savedCourse.getId()));
-    }
+		return convertToDto(savedCourse, savedCourse.getInstructor(),
+				curriculumRepository.findByCourseId(savedCourse.getId()));
+	}
 
-    @Transactional
-    public Optional<CourseDTO> updateCourse(Long id, CourseDTO courseDTO) {
-        return courseRepository.findById(id).map(course -> {
-            course.setName(courseDTO.getName());
-            course.setDescription(courseDTO.getDescription());
-            course.setCategory(courseDTO.getCategory());
-            course.setLessonsCount(courseDTO.getLessonsCount());
-            course.setStudentsCount(courseDTO.getStudentsCount());
-            course.setPrice(courseDTO.getPrice());
-            course.setDuration(courseDTO.getDuration());
-            course.setLevel(courseDTO.getLevel());
-            course.setEventPlace(courseDTO.getEventPlace());
+	@Transactional
+	public Optional<CourseDTO> updateCourse(Long id, CourseDTO courseDTO) {
+		return courseRepository.findById(id).map(course -> {
+			course.setName(courseDTO.getName());
+			course.setDescription(courseDTO.getDescription());
+			course.setCategory(courseDTO.getCategory());
+			course.setLessonsCount(courseDTO.getLessonsCount());
+			course.setStudentsCount(courseDTO.getStudentsCount());
+			course.setPrice(courseDTO.getPrice());
+			course.setDuration(courseDTO.getDuration());
+			course.setLevel(courseDTO.getLevel());
+			course.setEventPlace(courseDTO.getEventPlace());
 
-            // Actualizar imagen en Blob Storage si es necesario
-            if (courseDTO.getImage() != null && !courseDTO.getImage().isEmpty()) {
-                try {
-                    String base64Image = courseDTO.getImage();
-                    if (base64Image.startsWith("data:image")) {
-                        int commaIndex = base64Image.indexOf(",") + 1;
-                        base64Image = base64Image.substring(commaIndex);
-                    }
-                    byte[] decodedImage = Base64.getDecoder().decode(base64Image);
-                    String imageUrl = blobStorageService.uploadImage(decodedImage, "imagenes-cursos", "curso-" + courseDTO.getName() + ".jpg");
-                    course.setImageUrl(imageUrl);
-                } catch (Exception e) {
-                    throw new RuntimeException("Error al cargar la imagen en Blob Storage: " + e.getMessage());
-                }
-            }
+			// Actualizar imagen en Blob Storage si es necesario
+			if (courseDTO.getImageUrl() != null && !courseDTO.getImageUrl().isEmpty()) {
+				String imageUrl = courseDTO.getImageUrl().trim();
 
-            course.setStartDate(courseDTO.getStartDate());
-            course.setEndDate(courseDTO.getEndDate());
-            course.setUpdatedAt(courseDTO.getUpdatedAt());
+				// Verificar si la cadena parece ser una URL o una base64
+				if (imageUrl.startsWith("http") || imageUrl.startsWith("https")) {
+					// Es una URL, simplemente guardarla sin intentar decodificar
+					course.setImageUrl(imageUrl);
+				} else {
+					// Si no es una URL, asumimos que es base64 y eliminamos el prefijo si existe
+					try {
+						if (imageUrl.startsWith("data:image")) {
+							int commaIndex = imageUrl.indexOf(",") + 1;
+							imageUrl = imageUrl.substring(commaIndex);
+						}
 
-            // Actualizar el instructor del curso
-            if (courseDTO.getInstructor() != null) {
-                Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
-                instructorOpt.ifPresent(course::setInstructor);
-            }
+						byte[] decodedImage = Base64.getDecoder().decode(imageUrl);
+						// Subir la imagen decodificada al Blob Storage y obtener la URL
+						String uploadedImageUrl = blobStorageService.uploadImage(decodedImage, "imagenes-cursos",
+								"curso-" + courseDTO.getName() + ".jpg");
+						course.setImageUrl(uploadedImageUrl);
 
-            Course updatedCourse = courseRepository.save(course);
+					} catch (IllegalArgumentException e) {
+						throw new RuntimeException("Error al decodificar la imagen: la cadena base64 no es válida.", e);
+					} catch (Exception e) {
+						throw new RuntimeException("Error al cargar la imagen en Blob Storage: " + e.getMessage(), e);
+					}
+				}
+			}
 
-            // Eliminar currículos anteriores asociados al curso
-            curriculumRepository.deleteByCourseId(updatedCourse.getId());
+			course.setStartDate(courseDTO.getStartDate());
+			course.setEndDate(courseDTO.getEndDate());
+			course.setUpdatedAt(courseDTO.getUpdatedAt());
 
-            // Guardar los nuevos currículos
-            if (courseDTO.getCurriculums() != null) {
-                List<Curriculum> curriculums = courseDTO.getCurriculums().stream()
-                        .map(curriculumDTO -> {
-                            Curriculum curriculum = new Curriculum();
-                            curriculum.setCourse(updatedCourse);
-                            curriculum.setSectionName(curriculumDTO.getSectionName());
-                            curriculum.setLessonName(curriculumDTO.getLessonName());
-                            curriculum.setContent(curriculumDTO.getContent());
-                            curriculum.setLessonOrder(curriculumDTO.getOrder());
-                            curriculum.setDuration(curriculumDTO.getDuration());
-                            curriculum.setType(curriculumDTO.getType());
-                            curriculum.setResourceLink(curriculumDTO.getResourceLink());
-                            curriculum.setIsMandatory(curriculumDTO.getIsMandatory());
-                            return curriculum;
-                        }).collect(Collectors.toList());
-                curriculumRepository.saveAll(curriculums);
-            }
+			// Actualizar el instructor del curso
+			if (courseDTO.getInstructor() != null) {
+				Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
+				instructorOpt.ifPresent(course::setInstructor);
+			}
 
-            return convertToDto(updatedCourse, updatedCourse.getInstructor(), curriculumRepository.findByCourseId(updatedCourse.getId()));
-        });
-    }
+			Course updatedCourse = courseRepository.save(course);
 
-    public boolean deleteCourse(Long id) {
-        return courseRepository.findById(id).map(course -> {
-            course.setIsVisible(false);
-            courseRepository.save(course);
-            return true;
-        }).orElse(false);
-    }
+			// Eliminar currículos anteriores asociados al curso
+			curriculumRepository.deleteByCourseId(updatedCourse.getId());
 
-    @Cacheable("courses")
-    public Page<CourseListDTO> getAllVisibleCourses(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
-        return courseRepository.findAllVisibleCourses(pageable);
-    }
+			// Guardar los nuevos currículos
+			if (courseDTO.getCurriculums() != null) {
+				List<Curriculum> curriculums = courseDTO.getCurriculums().stream().map(curriculumDTO -> {
+					Curriculum curriculum = new Curriculum();
+					curriculum.setCourse(updatedCourse);
+					curriculum.setSectionName(curriculumDTO.getSectionName());
+					curriculum.setLessonName(curriculumDTO.getLessonName());
+					curriculum.setContent(curriculumDTO.getContent());
+					curriculum.setLessonOrder(curriculumDTO.getOrder());
+					curriculum.setDuration(curriculumDTO.getDuration());
+					curriculum.setType(curriculumDTO.getType());
+					curriculum.setResourceLink(curriculumDTO.getResourceLink());
+					curriculum.setIsMandatory(curriculumDTO.getIsMandatory());
+					return curriculum;
+				}).collect(Collectors.toList());
+				curriculumRepository.saveAll(curriculums);
+			}
 
-    public CourseDTO getCourseDetailsById(Long id) {
-        Optional<Course> courseOpt = courseRepository.findById(id);
-        if (courseOpt.isPresent()) {
-            Course course = courseOpt.get();
-            Instructor instructor = instructorRepository.findById(course.getInstructor().getId()).orElse(null);
-            List<Curriculum> curriculums = curriculumRepository.findByCourseId(course.getId());
-            return convertToDto(course, instructor, curriculums);
-        }
-        return null;
-    }
+			return convertToDto(updatedCourse, updatedCourse.getInstructor(),
+					curriculumRepository.findByCourseId(updatedCourse.getId()));
+		});
+	}
 
-    private CourseDTO convertToBasicDto(Course course) {
-        InstructorDTO instructorDTO = course.getInstructor() != null ? new InstructorDTO(
-                course.getInstructor().getId(),
-                course.getInstructor().getName(),
-                course.getInstructor().getBio(),
-                course.getInstructor().getProfileImage() != null ? Base64.getEncoder().encodeToString(course.getInstructor().getProfileImage()) : null
-        ) : null;
+	public boolean deleteCourse(Long id) {
+		return courseRepository.findById(id).map(course -> {
+			course.setIsVisible(false);
+			courseRepository.save(course);
+			return true;
+		}).orElse(false);
+	}
 
-        return new CourseDTO(
-            course.getId(),
-            course.getName(),
-            course.getDescription(),
-            course.getCategory(),
-            course.getLessonsCount(),
-            course.getStudentsCount(),
-            course.getPrice(),
-            course.getDuration(),
-            course.getLevel(),
-            course.getEventPlace(),
-            course.getImageUrl(), // Utilizar la URL de la imagen
-            instructorDTO,
-            course.getStartDate(),
-            course.getEndDate(),
-            course.getCreatedAt(),
-            course.getUpdatedAt(),
-            null
-        );
-    }
+	@Cacheable("courses")
+	public Page<CourseListDTO> getAllVisibleCourses(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
+		return courseRepository.findAllVisibleCourses(pageable);
+	}
 
-    private CourseDTO convertToDto(Course course, Instructor instructor, List<Curriculum> curriculums) {
-        InstructorDTO instructorDTO = instructor != null ? new InstructorDTO(
-                instructor.getId(),
-                instructor.getName(),
-                instructor.getBio(),
-                instructor.getProfileImage() != null ? Base64.getEncoder().encodeToString(instructor.getProfileImage()) : null
-        ) : null;
+	public CourseDTO getCourseDetailsById(Long id) {
+		Optional<Course> courseOpt = courseRepository.findById(id);
+		if (courseOpt.isPresent()) {
+			Course course = courseOpt.get();
+			Instructor instructor = instructorRepository.findById(course.getInstructor().getId()).orElse(null);
+			List<Curriculum> curriculums = curriculumRepository.findByCourseId(course.getId());
+			return convertToDto(course, instructor, curriculums);
+		}
+		return null;
+	}
 
-        List<CurriculumDTO> curriculumDTOs = curriculums != null ? curriculums.stream()
-                .map(curriculum -> new CurriculumDTO(
-                        curriculum.getId(),
-                        curriculum.getSectionName(),
-                        curriculum.getLessonName(),
-                        curriculum.getContent(),
-                        curriculum.getLessonOrder(),
-                        curriculum.getDuration(),
-                        curriculum.getType(),
-                        curriculum.getResourceLink(),
-                        curriculum.getIsMandatory()
-                ))
-                .collect(Collectors.toList()) : new ArrayList<>();
+	private CourseDTO convertToBasicDto(Course course) {
+		InstructorDTO instructorDTO = course.getInstructor() != null ? new InstructorDTO(course.getInstructor().getId(),
+				course.getInstructor().getName(), course.getInstructor().getBio(),
+				course.getInstructor().getProfileImage() != null
+						? Base64.getEncoder().encodeToString(course.getInstructor().getProfileImage())
+						: null)
+				: null;
 
-        return new CourseDTO(
-            course.getId(),
-            course.getName(),
-            course.getDescription(),
-            course.getCategory(),
-            course.getLessonsCount(),
-            course.getStudentsCount(),
-            course.getPrice(),
-            course.getDuration(),
-            course.getLevel(),
-            course.getEventPlace(),
-            course.getImageUrl(), // Utilizar la URL de la imagen
-            instructorDTO,
-            course.getStartDate(),
-            course.getEndDate(),
-            course.getCreatedAt(),
-            course.getUpdatedAt(),
-            curriculumDTOs
-        );
-    }
+		return new CourseDTO(course.getId(), course.getName(), course.getDescription(), course.getCategory(),
+				course.getLessonsCount(), course.getStudentsCount(), course.getPrice(), course.getDuration(),
+				course.getLevel(), course.getEventPlace(), course.getImageUrl(), // Utilizar la URL de la imagen
+				instructorDTO, course.getStartDate(), course.getEndDate(), course.getCreatedAt(), course.getUpdatedAt(),
+				null);
+	}
+
+	private CourseDTO convertToDto(Course course, Instructor instructor, List<Curriculum> curriculums) {
+		InstructorDTO instructorDTO = instructor != null
+				? new InstructorDTO(instructor.getId(), instructor.getName(), instructor.getBio(),
+						instructor.getProfileImage() != null
+								? Base64.getEncoder().encodeToString(instructor.getProfileImage())
+								: null)
+				: null;
+
+		List<CurriculumDTO> curriculumDTOs = curriculums != null ? curriculums.stream()
+				.map(curriculum -> new CurriculumDTO(curriculum.getId(), curriculum.getSectionName(),
+						curriculum.getLessonName(), curriculum.getContent(), curriculum.getLessonOrder(),
+						curriculum.getDuration(), curriculum.getType(), curriculum.getResourceLink(),
+						curriculum.getIsMandatory()))
+				.collect(Collectors.toList()) : new ArrayList<>();
+
+		return new CourseDTO(course.getId(), course.getName(), course.getDescription(), course.getCategory(),
+				course.getLessonsCount(), course.getStudentsCount(), course.getPrice(), course.getDuration(),
+				course.getLevel(), course.getEventPlace(), course.getImageUrl(), // Utilizar la URL de la imagen
+				instructorDTO, course.getStartDate(), course.getEndDate(), course.getCreatedAt(), course.getUpdatedAt(),
+				curriculumDTOs);
+	}
 }
