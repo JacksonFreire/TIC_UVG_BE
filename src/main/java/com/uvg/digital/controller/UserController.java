@@ -29,10 +29,19 @@ public class UserController {
 	
 	@Autowired
 	private AzureEmailService emailService;
-
+	
 	
 	@PostMapping("/register")
-    public ResponseEntity<User> registerUser(@ModelAttribute UserDTO userDTO, @RequestPart("document") MultipartFile document) {
+    public ResponseEntity<User> registerUser(@ModelAttribute UserDTO userDTO) {
+		
+		// Procesar el archivo y otros datos del usuario
+        MultipartFile document = userDTO.getDocument();
+        
+        if (document != null && !document.isEmpty()) {
+            // Aquí puedes manejar la carga del archivo, guardarlo en un almacenamiento, etc.
+            System.out.println("Archivo recibido: " + document.getOriginalFilename());
+        }
+        
         User registeredUser = userService.registerUser(userDTO, document);
         return ResponseEntity.ok(registeredUser);
     }

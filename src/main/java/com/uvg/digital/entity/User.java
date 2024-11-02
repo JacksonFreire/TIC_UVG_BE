@@ -1,17 +1,13 @@
 package com.uvg.digital.entity;
 
 
-import java.sql.Types;
 import java.time.LocalDate;
-
-import org.hibernate.annotations.JdbcTypeCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -57,11 +53,6 @@ public class User {
     @Column(nullable = false)
     private Boolean verified = false;
 
-    @Lob
-    @JdbcTypeCode(Types.BINARY)
-    @Column(name = "document", columnDefinition = "BYTEA")
-    private byte[] document;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
 
@@ -70,6 +61,10 @@ public class User {
     
     @Column(name = "verification_token")
     private String verificationToken;
+    
+    @Column(name = "document_url", length = 500)
+    private String documentUrl;
+
 
     @PrePersist
     protected void onCreate() {

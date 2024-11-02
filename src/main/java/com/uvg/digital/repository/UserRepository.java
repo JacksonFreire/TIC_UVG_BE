@@ -13,5 +13,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByVerificationToken(String token);
     
     Optional<User> findByUsername(String username);
-
+    
 }

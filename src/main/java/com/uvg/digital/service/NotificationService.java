@@ -43,7 +43,7 @@ public class NotificationService {
     }
 
     public void notifyAdminOfNewEnrollment(Course course, Event event, User user) {
-        String adminEmail = "admin@example.com"; // Cambia esto por la dirección de correo del administrador
+        String adminEmail = "info@univeritasgroup.com"; 
         String subject;
         String body;
 
