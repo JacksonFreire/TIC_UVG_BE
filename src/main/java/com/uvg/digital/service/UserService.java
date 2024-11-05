@@ -29,6 +29,11 @@ public class UserService {
     private final BlobStorageService blobStorageService;
 
     public User registerUser(UserDTO userDTO, MultipartFile document) {
+    	
+    	if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("La contraseña no puede ser nula o vacía");
+        }
+    	
         User user = new User();
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
