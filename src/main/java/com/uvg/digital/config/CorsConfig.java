@@ -18,7 +18,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")  // Permitir solo las URLs que empiezan con /api
                 .allowedOrigins(baseUrlFe, arubaBaseUrl)  // Permitir solo estos dos orígenes
-                .allowedMethods("GET", "POST", "PUT", "DELETE")  // Permitir estos métodos
+                .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONS")  // Permitir estos métodos
                 .allowedHeaders("Authorization", "Content-Type")  // Solo permitir ciertos encabezados
                 .allowCredentials(true);  // Permitir credenciales si es necesario
     }

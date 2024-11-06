@@ -1,6 +1,8 @@
 package com.uvg.digital.controller;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.uvg.digital.entity.Instructor;
 import com.uvg.digital.model.CourseDTO;
 import com.uvg.digital.model.CourseListDTO;
 import com.uvg.digital.model.EventDTO;
+import com.uvg.digital.model.ItemInstructorDTO;
 import com.uvg.digital.service.CourseService;
 import com.uvg.digital.service.EventService;
+import com.uvg.digital.service.InstructorService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +39,9 @@ public class ActivityManagementController {
     
     @Autowired
 	private EventService eventService;
+    
+    @Autowired
+    private InstructorService instructorService;
     
     
     // Obtener todos los cursos visibles con paginación
@@ -119,6 +127,27 @@ public class ActivityManagementController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    
+ // Obtener todos los instructores
+    @GetMapping("/instructor/list")
+    public List<ItemInstructorDTO> getAllInstructors() {
+        List<Instructor> instructors = instructorService.getAllInstructors();
+        return instructors.stream()
+                .map(instructor -> new ItemInstructorDTO(instructor.getId(), instructor.getName()))
+                .collect(Collectors.toList());
+    }
+
+    // Obtener un instructor por ID
+    @GetMapping("/instructor/{id}")
+    public ResponseEntity<ItemInstructorDTO> getInstructorById(@PathVariable Long id) {
+        Instructor instructor = instructorService.getInstructorById(id);
+        if (instructor != null) {
+        	ItemInstructorDTO dto = new ItemInstructorDTO(instructor.getId(), instructor.getName());
+            return ResponseEntity.ok(dto);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }

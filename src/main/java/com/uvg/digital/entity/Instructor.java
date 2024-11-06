@@ -36,6 +36,9 @@ public class Instructor {
     @JdbcTypeCode(Types.BINARY)
     @Column(name = "profile_image", columnDefinition = "BYTEA")
     private byte[] profileImage;
+    
+    @Column(nullable = false, length = 100)
+    private String specialization;
 
     @PrePersist
     protected void onCreate() {
