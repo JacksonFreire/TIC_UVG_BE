@@ -25,27 +25,22 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**")
 				.permitAll()
 
-				// Endpoints públicos específicos de ActivityManagementController
-				.requestMatchers(HttpMethod.GET, "/api/activities/courses/list", "/api/activities/courses/details/*",
-						"/api/activities/events", "/api/activities/events/*")
+				// Endpoints públicos
+				.requestMatchers("/api/users/register", "/api/users/verify**", "/api/users/send", "/api/auth/**","/api/activities/courses/list","/api/activities/courses/details/*","/api/activities/events","/api/activities/events/*")
 				.permitAll()
 
-				// Otros endpoints públicos fuera de ActivityManagementController
-				.requestMatchers("/api/users/register", "/api/users/verify**", "/api/users/send", "/api/auth/**")
-				.permitAll()
-
-
-				// Endpoints de ActivityManagementController que requieren rol ADMIN
-				.requestMatchers(HttpMethod.POST, "/api/activities/courses/create").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/api/activities/courses/update/*").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/api/activities/courses/delete/*").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.POST, "/api/activities/events/create").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/api/activities/events/update/*").hasAuthority("ADMIN")
-				.requestMatchers(HttpMethod.DELETE, "/api/activities/events/delete/*").hasAuthority("ADMIN")
+				// Endpoints protegidos para administradores con rol ADMIN
+				.requestMatchers("/api/enrollments/admin/course/*", "/api/enrollments/admin/event/*",
+						"/api/activities/courses/create", "/api/activities/courses/update/*",
+						"/api/activities/courses/delete/*", "/api/activities/events/create",
+						"/api/activities/events/update/*", "/api/activities/events/delete/*")
+				.hasAuthority("ADMIN")
 
 				// Endpoints protegidos para usuarios con rol USER
-				.requestMatchers("/api/enrollments/isEnrolled","/api/enrollments/course/*", "/api/enrollments/event/*").hasAuthority("USER"))
+				.requestMatchers("/api/enrollments/isEnrolled", "/api/enrollments/course/*", "/api/enrollments/event/*")
+				.hasAuthority("USER")
 
+				.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
