@@ -1,14 +1,18 @@
 package com.uvg.digital.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.uvg.digital.entity.Enrollment;
-import com.uvg.digital.entity.User;
+
 import com.uvg.digital.entity.Course;
+import com.uvg.digital.entity.Enrollment;
 import com.uvg.digital.entity.Event;
+import com.uvg.digital.entity.User;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
@@ -32,5 +36,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 	Optional<Enrollment> findByUserIdAndCourseId(Long userId, Long courseId);
 
 	Optional<Enrollment> findByUserIdAndEventId(Long userId, Long eventId);
+
+	@Query("SELECT e FROM Enrollment e " + "LEFT JOIN e.course c " + "LEFT JOIN e.event ev "
+			+ "WHERE e.status = 'confirmed' AND " + "( (c.startDate IS NOT NULL AND c.startDate <= :reminderTime) "
+			+ "OR (ev.startDate IS NOT NULL AND ev.startDate <= :reminderTime) )")
+	List<Enrollment> findConfirmedEnrollmentsWithUpcomingEvents(@Param("reminderTime") LocalDateTime reminderTime);
 
 }
