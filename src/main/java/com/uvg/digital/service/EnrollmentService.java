@@ -169,6 +169,7 @@ public class EnrollmentService {
         try {
             Enrollment enrollment;
 
+            // Buscar la inscripción usando el ID de curso o evento
             if (enrollmentDTO.getCourseId() != null) {
                 enrollment = enrollmentRepository.findByUserIdAndCourseId(enrollmentDTO.getUserId(), enrollmentDTO.getCourseId())
                         .orElseThrow(() -> new NoSuchElementException("Inscripción para el curso no encontrada"));
@@ -179,15 +180,40 @@ public class EnrollmentService {
                 throw new IllegalArgumentException("Debe proporcionar un courseId o eventId para actualizar la inscripción");
             }
 
-            // Actualizar estado y comentarios de la inscripción
+            // Guardar los valores actuales de status y comments para compararlos luego
+            String oldStatus = enrollment.getStatus();
+            String oldComments = enrollment.getComments();
+
+            // Actualizar el estado y los comentarios de la inscripción
             enrollment.setStatus(enrollmentDTO.getStatus());
             enrollment.setComments(enrollmentDTO.getComments());
 
-            // Guardar los cambios
+            // Guardar los cambios en la inscripción
             enrollmentRepository.save(enrollment);
+
+            // Verificar si hubo cambios en el estado o comentarios para enviar notificación
+            boolean statusChanged = oldStatus == null || !oldStatus.equals(enrollment.getStatus());
+            boolean commentsChanged = oldComments == null || !oldComments.equals(enrollment.getComments());
+
+            if (statusChanged || commentsChanged) {
+                // Obtener los valores actualizados para el mensaje de notificación
+                User user = enrollment.getUser();
+                String status = enrollment.getStatus();
+                String comments = enrollment.getComments();
+
+                // Llamar a NotificationService para enviar el correo al usuario con el indicador statusChanged
+                if (enrollment.getCourse() != null) {
+                    notificationService.sendUpdateNotification(user, enrollment.getCourse(), null, status, comments, statusChanged);
+                } else if (enrollment.getEvent() != null) {
+                    notificationService.sendUpdateNotification(user, null, enrollment.getEvent(), status, comments, statusChanged);
+                } else {
+                    // Manejo en caso de que no haya curso ni evento, aunque esto no debería ocurrir en un flujo normal
+                    throw new IllegalArgumentException("La inscripción debe estar asociada a un curso o evento.");
+                }
+            }
+
         } catch (NoSuchElementException | IllegalArgumentException ex) {
-            throw new RuntimeException(ex.getMessage(), ex);
+            throw new RuntimeException("Error al actualizar la inscripción: " + ex.getMessage(), ex);
         }
     }
-
 }

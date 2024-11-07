@@ -63,8 +63,8 @@ public class NotificationService {
 	public void sendEventOrCourseReminder(User user, Course course, Event event) {
 		String subject;
 		String body;
-		
-		 System.out.println("Enviando recordatorio a: " + user.getEmail());
+
+		System.out.println("Enviando recordatorio a: " + user.getEmail());
 
 		if (course != null) {
 			subject = "Recordatorio: Curso Próximo - " + course.getName();
@@ -81,5 +81,29 @@ public class NotificationService {
 		}
 
 		emailService.sendEmail(user.getEmail(), subject, body);
+	}
+
+	public void sendUpdateNotification(User user, Course course, Event event, String status, String comments,
+			boolean statusChanged) {
+		String subject = "Actualización en tu inscripción";
+		StringBuilder body = new StringBuilder("Estimado " + user.getFirstName() + ",\n\n");
+
+		if (course != null) {
+			body.append("Tu inscripción en el curso \"" + course.getName() + "\" ha sido actualizada.\n");
+		} else if (event != null) {
+			body.append("Tu inscripción en el evento \"" + event.getName() + "\" ha sido actualizada.\n");
+		} else {
+			throw new IllegalArgumentException("La inscripción debe estar asociada a un curso o evento.");
+		}
+
+		if (statusChanged) {
+			body.append("Nuevo estado de inscripción: " + status + "\n");
+		}
+
+		if (comments != null && !comments.isEmpty()) {
+			body.append("\nComentario del administrador:\n" + comments);
+		}
+
+		emailService.sendEmail(user.getEmail(), subject, body.toString());
 	}
 }
