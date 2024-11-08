@@ -27,4 +27,13 @@ public class ReportController {
 		}
 	}
 
+	@GetMapping("/participants/event")
+	public ResponseEntity<byte[]> getParticipantEventReport(@RequestParam Long eventId) {
+		try {
+			return reportService.generateEventParticipantReport(eventId);
+		} catch (IOException e) {
+			return ResponseEntity.internalServerError().body(null);
+		}
+	}
+
 }

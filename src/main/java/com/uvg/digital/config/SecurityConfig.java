@@ -36,7 +36,7 @@ public class SecurityConfig {
 						"/api/enrollments/admin/event/*", "/api/activities/courses/create",
 						"/api/activities/courses/update/*", "/api/activities/courses/delete/*",
 						"/api/activities/events/create", "/api/activities/events/update/*",
-						"/api/activities/events/delete/*","/api/reports/participants/course")
+						"/api/activities/events/delete/*","/api/reports/participants/course","/api/reports/participants/event")
 				.hasAuthority("ADMIN")
 
 				// Endpoints protegidos para usuarios con rol USER
