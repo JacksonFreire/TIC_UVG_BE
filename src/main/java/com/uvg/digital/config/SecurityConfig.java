@@ -26,14 +26,17 @@ public class SecurityConfig {
 				.permitAll()
 
 				// Endpoints públicos
-				.requestMatchers("/api/users/register", "/api/users/verify**", "/api/users/send", "/api/auth/**","/api/activities/courses/list","/api/activities/courses/details/*","/api/activities/events","/api/activities/events/*")
+				.requestMatchers("/api/users/register", "/api/users/verify**", "/api/users/send", "/api/auth/**",
+						"/api/activities/courses/list", "/api/activities/courses/details/*", "/api/activities/events",
+						"/api/activities/events/*")
 				.permitAll()
 
 				// Endpoints protegidos para administradores con rol ADMIN
-				.requestMatchers("/api/activities/instructor/list","/api/enrollments/admin/course/*", "/api/enrollments/admin/event/*",
-						"/api/activities/courses/create", "/api/activities/courses/update/*",
-						"/api/activities/courses/delete/*", "/api/activities/events/create",
-						"/api/activities/events/update/*", "/api/activities/events/delete/*")
+				.requestMatchers("/api/activities/instructor/list", "/api/enrollments/admin/course/*",
+						"/api/enrollments/admin/event/*", "/api/activities/courses/create",
+						"/api/activities/courses/update/*", "/api/activities/courses/delete/*",
+						"/api/activities/events/create", "/api/activities/events/update/*",
+						"/api/activities/events/delete/*","/api/reports/participants/course","/api/reports/participants/event")
 				.hasAuthority("ADMIN")
 
 				// Endpoints protegidos para usuarios con rol USER
