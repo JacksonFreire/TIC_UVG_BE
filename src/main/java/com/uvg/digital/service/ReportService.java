@@ -25,7 +25,7 @@ public class ReportService {
 		this.enrollmentRepository = enrollmentRepository;
 	}
 
-	public ResponseEntity<byte[]> generateParticipantReport(Long courseId) throws IOException {
+	public ResponseEntity<byte[]> generateCourseParticipantReport(Long courseId) throws IOException {
 		// Obtener todas las inscripciones del curso, incluyendo todos los estados
 		List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
 
@@ -78,7 +78,7 @@ public class ReportService {
 
 		// Crear encabezado de columnas
 		Row headerRow = sheet.createRow(3);
-		String[] headers = { "Nombres", "Username", "Teléfono", "Email", "Estado de Inscripción" };
+		String[] headers = {"Username", "Nombres","Edad", "Teléfono", "Email", "Estado de Inscripción" };
 		CellStyle headerStyle = workbook.createCellStyle();
 		Font headerFont = workbook.createFont();
 		headerFont.setBold(true);
@@ -98,12 +98,13 @@ public class ReportService {
 		for (Enrollment enrollment : enrollments) {
 			Row row = sheet.createRow(rowIdx++);
 			User user = enrollment.getUser();
-
-			row.createCell(0).setCellValue(user.getFirstName() + " " + user.getLastName());
-			row.createCell(1).setCellValue(user.getUsername());
-			row.createCell(2).setCellValue(user.getPhoneNumber());
-			row.createCell(3).setCellValue(user.getEmail());
-			row.createCell(4).setCellValue(enrollment.getStatus());
+			
+			row.createCell(0).setCellValue(user.getUsername());
+			row.createCell(1).setCellValue(user.getFirstName() + " " + user.getLastName());
+			row.createCell(2).setCellValue(user.getAge());
+			row.createCell(3).setCellValue(user.getPhoneNumber());
+			row.createCell(4).setCellValue(user.getEmail());
+			row.createCell(5).setCellValue(enrollment.getStatus());
 		}
 
 		// Ajustar tamaño de las columnas
@@ -177,7 +178,7 @@ public class ReportService {
 
 		// Crear encabezado de columnas
 		Row headerRow = sheet.createRow(3);
-		String[] headers = { "Nombres", "Username", "Teléfono", "Email", "Estado de Inscripción" };
+		String[] headers = { "Username", "Nombres","Edad", "Teléfono", "Email", "Estado de Inscripción" };
 		CellStyle headerStyle = workbook.createCellStyle();
 		Font headerFont = workbook.createFont();
 		headerFont.setBold(true);
@@ -197,12 +198,13 @@ public class ReportService {
 		for (Enrollment enrollment : enrollments) {
 			Row row = sheet.createRow(rowIdx++);
 			User user = enrollment.getUser();
-
-			row.createCell(0).setCellValue(user.getFirstName() + " " + user.getLastName());
-			row.createCell(1).setCellValue(user.getUsername());
-			row.createCell(2).setCellValue(user.getPhoneNumber());
-			row.createCell(3).setCellValue(user.getEmail());
-			row.createCell(4).setCellValue(enrollment.getStatus());
+			
+			row.createCell(0).setCellValue(user.getUsername());
+			row.createCell(1).setCellValue(user.getFirstName() + " " + user.getLastName());
+			row.createCell(2).setCellValue(user.getAge());
+			row.createCell(3).setCellValue(user.getPhoneNumber());
+			row.createCell(4).setCellValue(user.getEmail());
+			row.createCell(5).setCellValue(enrollment.getStatus());
 		}
 
 		// Ajustar tamaño de las columnas

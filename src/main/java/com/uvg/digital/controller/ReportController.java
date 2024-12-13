@@ -21,7 +21,7 @@ public class ReportController {
 	@GetMapping("/participants/course")
 	public ResponseEntity<byte[]> getParticipantCourseReport(@RequestParam Long courseId) {
 		try {
-			return reportService.generateParticipantReport(courseId);
+			return reportService.generateCourseParticipantReport(courseId);
 		} catch (IOException e) {
 			return ResponseEntity.internalServerError().body(null);
 		}

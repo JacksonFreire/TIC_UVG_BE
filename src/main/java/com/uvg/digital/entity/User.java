@@ -2,6 +2,7 @@ package com.uvg.digital.entity;
 
 
 import java.time.LocalDate;
+import java.time.Period;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -79,5 +80,12 @@ public class User {
     
     public Boolean isVerified() {
         return verified;
+    }
+    
+    public int getAge() {
+        if (birthDate == null) {
+            return 0;
+        }
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 }
