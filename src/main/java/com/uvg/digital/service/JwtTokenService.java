@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.uvg.digital.entity.User;
+import com.uvg.digital.repository.InstructorRepository;
 import com.uvg.digital.repository.UserRepository;
 
 import io.jsonwebtoken.Jwts;
@@ -30,6 +31,9 @@ public class JwtTokenService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private InstructorRepository instructorRepository;
 
     private Key key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
@@ -51,14 +55,22 @@ public class JwtTokenService {
         
         System.out.println("Roles incluidos en el token: " + roles);
 
-        return Jwts.builder()
+        var jwtBuilder = Jwts.builder()
             .setSubject(username)
             .claim("userId", userId)
             .claim("role", roles)
             .setIssuedAt(currentDate)
             .setExpiration(expireDate)
-            .signWith(key(), SignatureAlgorithm.HS256)
-            .compact();
+            .signWith(key(), SignatureAlgorithm.HS256);
+        
+        // Agregar instructorId si aplica
+        if (roles.contains("INSTR")) {
+            instructorRepository.findByUserId(user.get().getId())
+                    .ifPresent(instructor -> jwtBuilder.claim("instructorId", instructor.getId()));
+        }
+
+        return jwtBuilder.compact();
+        
     }
 
     public String getUsernameFromToken(String token) {

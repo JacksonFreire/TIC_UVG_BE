@@ -45,6 +45,9 @@ public class CourseService {
 	@Autowired
 	private BlobStorageService blobStorageService;
 
+	@Autowired
+	private NotificationService notificationService;
+
 	@Transactional
 	public CourseDTO createCourse(CourseDTO courseDTO) {
 		Course course = new Course();
@@ -83,7 +86,12 @@ public class CourseService {
 		// Establecer el instructor del curso
 		if (courseDTO.getInstructor() != null) {
 			Optional<Instructor> instructorOpt = instructorRepository.findById(courseDTO.getInstructor().getId());
-			instructorOpt.ifPresent(course::setInstructor);
+			instructorOpt.ifPresent(instructor -> {
+				course.setInstructor(instructor);
+
+				// Notificar sobre asignación del curso
+				notificationService.notifyCourseAssignment(instructor, course);
+			});
 		}
 
 		Course savedCourse = courseRepository.save(course);
@@ -113,6 +121,30 @@ public class CourseService {
 	@Transactional
 	public Optional<CourseDTO> updateCourse(Long id, CourseDTO courseDTO) {
 		return courseRepository.findById(id).map(course -> {
+
+			StringBuilder changes = new StringBuilder(); // Para registrar los cambios importantes
+
+			// Verificar cambios en la fecha de inicio
+			if (!courseDTO.getStartDate().equals(course.getStartDate())) {
+				changes.append("• Fecha de inicio: ").append(course.getStartDate()).append(" → ")
+						.append(courseDTO.getStartDate()).append("\n");
+				course.setStartDate(courseDTO.getStartDate());
+			}
+
+			// Verificar cambios en la fecha de finalización
+			if (!courseDTO.getEndDate().equals(course.getEndDate())) {
+				changes.append("• Fecha de finalización: ").append(course.getEndDate()).append(" → ")
+						.append(courseDTO.getEndDate()).append("\n");
+				course.setEndDate(courseDTO.getEndDate());
+			}
+
+			// Verificar cambios en el lugar del evento
+			if (!courseDTO.getEventPlace().equals(course.getEventPlace())) {
+				changes.append("• Lugar del evento: ").append(course.getEventPlace()).append(" → ")
+						.append(courseDTO.getEventPlace()).append("\n");
+				course.setEventPlace(courseDTO.getEventPlace());
+			}
+
 			course.setName(courseDTO.getName());
 			course.setDescription(courseDTO.getDescription());
 			course.setCategory(courseDTO.getCategory());
@@ -186,6 +218,12 @@ public class CourseService {
 				curriculumRepository.saveAll(curriculums);
 			}
 
+			// Notificar al instructor si hubo cambios importantes
+			if (changes.length() > 0 && updatedCourse.getInstructor() != null) {
+				notificationService.sendCourseUpdateNotification(updatedCourse.getInstructor().getUser(), updatedCourse,
+						changes.toString());
+			}
+
 			return convertToDto(updatedCourse, updatedCourse.getInstructor(),
 					curriculumRepository.findByCourseId(updatedCourse.getId()));
 		});
@@ -195,6 +233,12 @@ public class CourseService {
 		return courseRepository.findById(id).map(course -> {
 			course.setIsVisible(false);
 			courseRepository.save(course);
+
+			// Notificar al instructor sobre la eliminación
+			if (course.getInstructor() != null) {
+				notificationService.notifyCourseDeletion(course);
+			}
+
 			return true;
 		}).orElse(false);
 	}
@@ -216,27 +260,21 @@ public class CourseService {
 		return null;
 	}
 
-	private CourseDTO convertToBasicDto(Course course) {
-		InstructorDTO instructorDTO = course.getInstructor() != null ? new InstructorDTO(course.getInstructor().getId(),
-				course.getInstructor().getName(), course.getInstructor().getBio(),
-				course.getInstructor().getProfileImage() != null
-						? Base64.getEncoder().encodeToString(course.getInstructor().getProfileImage())
-						: null)
-				: null;
+	// Obtener cursos de un instructor por ID
+	public List<CourseListDTO> getCoursesByInstructorId(Long idInstructor) {
+		// Verificar que el instructor exista antes de buscar los cursos
+		instructorRepository.findById(idInstructor)
+				.orElseThrow(() -> new RuntimeException("Instructor no encontrado con el ID: " + idInstructor));
 
-		return new CourseDTO(course.getId(), course.getName(), course.getDescription(), course.getCategory(),
-				course.getLessonsCount(), course.getStudentsCount(), course.getPrice(), course.getDuration(),
-				course.getLevel(), course.getEventPlace(), course.getImageUrl(), // Utilizar la URL de la imagen
-				instructorDTO, course.getStartDate(), course.getEndDate(), course.getCreatedAt(), course.getUpdatedAt(),
-				null);
+		// Usar el método del repositorio para obtener los cursos
+		return courseRepository.findVisibleCoursesByInstructorId(idInstructor);
 	}
 
 	private CourseDTO convertToDto(Course course, Instructor instructor, List<Curriculum> curriculums) {
-		InstructorDTO instructorDTO = instructor != null
-				? new InstructorDTO(instructor.getId(), instructor.getName(), instructor.getBio(),
-						instructor.getProfileImage() != null
-								? Base64.getEncoder().encodeToString(instructor.getProfileImage())
-								: null)
+		InstructorDTO instructorDTO = instructor != null ? new InstructorDTO(instructor.getId(),
+				instructor.getUser().getFirstName() + " " + instructor.getUser().getLastName(), instructor.getBio(),
+				instructor.getProfileImage() != null ? Base64.getEncoder().encodeToString(instructor.getProfileImage())
+						: null)
 				: null;
 
 		List<CurriculumDTO> curriculumDTOs = curriculums != null ? curriculums.stream()

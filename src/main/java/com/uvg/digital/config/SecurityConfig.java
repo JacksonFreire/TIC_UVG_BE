@@ -32,12 +32,15 @@ public class SecurityConfig {
 				.permitAll()
 
 				// Endpoints protegidos para administradores con rol ADMIN
-				.requestMatchers("/api/activities/instructor/list", "/api/enrollments/admin/course/*",
-						"/api/enrollments/admin/event/*", "/api/activities/courses/create",
+				.requestMatchers("/api/activities/instructor/list",
+						"/api/activities/courses/create",
 						"/api/activities/courses/update/*", "/api/activities/courses/delete/*",
 						"/api/activities/events/create", "/api/activities/events/update/*",
 						"/api/activities/events/delete/*","/api/reports/participants/course","/api/reports/participants/event")
 				.hasAuthority("ADMIN")
+				
+				.requestMatchers("/api/enrollments/admin/course/*", "/api/enrollments/admin/event/*")
+			    .hasAnyAuthority("ADMIN", "INSTR")
 
 				// Endpoints protegidos para usuarios con rol USER
 				.requestMatchers("/api/enrollments/isEnrolled", "/api/enrollments/course/*", "/api/enrollments/event/*")

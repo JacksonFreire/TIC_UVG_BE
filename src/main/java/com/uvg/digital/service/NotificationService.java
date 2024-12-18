@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import com.uvg.digital.entity.User;
 import com.uvg.digital.entity.Course;
 import com.uvg.digital.entity.Event;
+import com.uvg.digital.entity.Instructor;
 
 @Service
 public class NotificationService {
@@ -106,4 +107,71 @@ public class NotificationService {
 
 		emailService.sendEmail(user.getEmail(), subject, body.toString());
 	}
+
+	public void notifyCourseAssignment(Instructor instructor, Course course) {
+		String subject = "Nuevo curso asignado: \"" + course.getName() + "\"";
+		String body = "Estimado/a " + instructor.getUser().getFirstName() + ",\n\n" + "Se le ha asignado el curso \""
+				+ course.getName() + "\".\n" + "Fecha de inicio: " + course.getStartDate() + "\n"
+				+ "Fecha de finalización: " + course.getEndDate() + "\n\n"
+				+ "Por favor, acceda a la plataforma para más detalles.\n\n" + "Atentamente,\n"
+				+ "El equipo de Univeritas Group Digital.";
+		emailService.sendEmail(instructor.getUser().getEmail(), subject, body);
+	}
+
+	public void sendCourseUpdateNotification(User user, Course course, String changes) {
+		String subject = "Actualización en el curso: " + course.getName();
+		String body = "Estimado " + user.getFirstName() + ",\n\n" + "El curso \"" + course.getName()
+				+ "\" ha sido actualizado con los siguientes cambios importantes:\n\n" + changes
+				+ "\nPor favor, revisa los detalles actualizados y ajusta tu planificación si es necesario.\n\n"
+				+ "Gracias por tu dedicación y esfuerzo.\n" + "Atentamente,\n" + "El equipo de Univeritas Group";
+
+		// Llamada al servicio de email para enviar el correo
+		emailService.sendEmail(user.getEmail(), subject, body);
+	}
+
+	public void notifyCourseDeletion(Course course) {
+		String subject = "El curso \"" + course.getName() + "\" ha sido eliminado.";
+		String body = "Estimado/a " + course.getInstructor().getUser().getFirstName() + ",\n\n"
+				+ "Lamentamos informarle que el curso \"" + course.getName() + "\" ha sido eliminado.\n\n"
+				+ "Si tiene alguna consulta, por favor contáctenos.\n\n" + "Atentamente,\n"
+				+ "El equipo de Univeritas Group Digital.";
+		emailService.sendEmail(course.getInstructor().getUser().getEmail(), subject, body);
+	}
+
+	// Notificación de evento creado
+	public void sendEventCreatedNotification(User instructor, Event event) {
+		String subject = "Nuevo Evento Asignado: " + event.getName();
+		String body = "Estimado/a " + instructor.getFirstName() + ",\n\n" + "Se le ha asignado un nuevo evento:\n\n"
+				+ "Nombre: " + event.getName() + "\n" + "Fecha de inicio: " + event.getStartDate() + "\n"
+				+ "Fecha de finalización: " + event.getEndDate() + "\n" + "Ubicación: " + event.getLocation() + "\n\n"
+				+ "Por favor revise su calendario y planifique su participación.\n\n" + "Saludos cordiales,\n"
+				+ "Equipo de Univeritas Group";
+
+		emailService.sendEmail(instructor.getEmail(), subject, body);
+	}
+
+	public void sendEventUpdateNotification(Instructor instructor, Event event, String changes) {
+	    String subject = "Actualización en el evento: " + event.getName();
+	    String body = "Estimado " + instructor.getUser().getFirstName() + " " + instructor.getUser().getLastName() + ",\n\n"
+	            + "Se han realizado cambios importantes en el evento que impartes:\n\n"
+	            + changes
+	            + "\n\nGracias por tu compromiso y dedicación.\n"
+	            + "Equipo de Univeritas Group Digital.";
+
+	    emailService.sendEmail(instructor.getUser().getEmail(), subject, body);
+	}
+
+
+	// Notificación de evento eliminado
+	public void sendEventDeletedNotification(User instructor, Event event) {
+		String subject = "Cancelación de Evento: " + event.getName();
+		String body = "Estimado/a " + instructor.getFirstName() + ",\n\n" + "Lamentamos informarle que el evento \""
+				+ event.getName() + "\" ha sido cancelado.\n\n" + "Fecha original de inicio: " + event.getStartDate()
+				+ "\n" + "Ubicación: " + event.getLocation() + "\n\n"
+				+ "Por favor ajuste su calendario en consecuencia.\n\n" + "Saludos cordiales,\n"
+				+ "Equipo de Univeritas Group";
+
+		emailService.sendEmail(instructor.getEmail(), subject, body);
+	}
+
 }

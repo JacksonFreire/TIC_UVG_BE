@@ -2,7 +2,6 @@ package com.uvg.digital.controller;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.uvg.digital.entity.Instructor;
 import com.uvg.digital.model.CourseDTO;
 import com.uvg.digital.model.CourseListDTO;
 import com.uvg.digital.model.EventDTO;
@@ -133,21 +131,35 @@ public class ActivityManagementController {
  // Obtener todos los instructores
     @GetMapping("/instructor/list")
     public List<ItemInstructorDTO> getAllInstructors() {
-        List<Instructor> instructors = instructorService.getAllInstructors();
-        return instructors.stream()
-                .map(instructor -> new ItemInstructorDTO(instructor.getId(), instructor.getName()))
-                .collect(Collectors.toList());
+        return instructorService.getAllInstructorDTOs(); // Llama al servicio que ya devuelve DTOs
     }
-
+    
     // Obtener un instructor por ID
     @GetMapping("/instructor/{id}")
     public ResponseEntity<ItemInstructorDTO> getInstructorById(@PathVariable Long id) {
-        Instructor instructor = instructorService.getInstructorById(id);
-        if (instructor != null) {
-        	ItemInstructorDTO dto = new ItemInstructorDTO(instructor.getId(), instructor.getName());
+        try {
+            ItemInstructorDTO dto = instructorService.getInstructorDTOById(id); // Llama al servicio que devuelve el DTO
             return ResponseEntity.ok(dto);
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+    
+    @GetMapping("/instructor/{id}/courses")
+    public ResponseEntity<List<CourseListDTO>> getCoursesByInstructorId(@PathVariable("id") Long idInstructor) {
+        List<CourseListDTO> courses = courseService.getCoursesByInstructorId(idInstructor);
+        if (courses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(courses);
+    }
+    
+    @GetMapping("/instructor/{id}/events")
+    public ResponseEntity<List<EventDTO>> getEventsByInstructorId(@PathVariable("id") Long idInstructor) {
+        List<EventDTO> events = eventService.getEventsByInstructorId(idInstructor);
+        if (events.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(events);
     }
 }

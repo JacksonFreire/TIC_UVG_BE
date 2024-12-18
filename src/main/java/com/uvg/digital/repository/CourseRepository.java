@@ -1,5 +1,7 @@
 package com.uvg.digital.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,13 +13,20 @@ import com.uvg.digital.model.CourseListDTO;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
-	/*
-	List<Course> findAllByImageIsNotNull(); */
-    
-    	// Método con proyección DTO para obtener cursos visibles
-	@Query("SELECT new com.uvg.digital.model.CourseListDTO(c.id, c.name, c.startDate, c.endDate, c.price, c.imageUrl, i.name) " +
-		       "FROM Course c JOIN c.instructor i WHERE c.isVisible = true ORDER BY c.startDate ASC")
-		Page<CourseListDTO> findAllVisibleCourses(Pageable pageable);
 
-           
+	// Método con proyección DTO para obtener cursos visibles
+	@Query("SELECT new com.uvg.digital.model.CourseListDTO(c.id, c.name, c.startDate, c.endDate, c.price, c.imageUrl, i.user.firstName || ' ' || i.user.lastName) "
+			+ "FROM Course c JOIN c.instructor i WHERE c.isVisible = true ORDER BY c.startDate ASC")
+	Page<CourseListDTO> findAllVisibleCourses(Pageable pageable);
+
+	// Método con proyección DTO para obtener cursos de un instructor específico
+	@Query("SELECT new com.uvg.digital.model.CourseListDTO(c.id, c.name, c.startDate, c.endDate, c.price, c.imageUrl, i.user.firstName || ' ' || i.user.lastName) "
+			+ "FROM Course c JOIN c.instructor i WHERE i.id = :instructorId ORDER BY c.startDate ASC")
+	List<CourseListDTO> findByInstructorId(Long instructorId);
+
+	@Query("SELECT new com.uvg.digital.model.CourseListDTO(c.id, c.name, c.startDate, c.endDate, c.price, c.imageUrl, i.user.firstName || ' ' || i.user.lastName) "
+			+ "FROM Course c JOIN c.instructor i "
+			+ "WHERE i.id = :instructorId AND c.isVisible = true ORDER BY c.startDate ASC")
+	List<CourseListDTO> findVisibleCoursesByInstructorId(Long instructorId);
+
 }

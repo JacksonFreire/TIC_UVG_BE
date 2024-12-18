@@ -2,17 +2,16 @@ package com.uvg.digital.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "events")
 public class Event {
@@ -46,6 +45,7 @@ public class Event {
     private String additionalDetails;
     
     @Column(name = "is_visible", nullable = false)
+    @Builder.Default
     private Boolean isVisible = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -56,6 +56,10 @@ public class Event {
     
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+    
+    @ManyToOne
+    @JoinColumn(name = "instructor_id", nullable = false)
+    private Instructor instructor;
 
     @PrePersist
     protected void onCreate() {

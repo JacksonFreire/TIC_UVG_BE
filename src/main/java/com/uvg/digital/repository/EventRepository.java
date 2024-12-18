@@ -11,9 +11,11 @@ import com.uvg.digital.entity.Event;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-	
+
 	List<Event> findAllByImageUrlIsNotNull();
-	
+
 	Page<Event> findByIsVisibleTrueOrderByStartDateAsc(Pageable pageable);
-    
+
+	List<Event> findByInstructorIdAndIsVisibleTrue(Long instructorId);
+
 }
