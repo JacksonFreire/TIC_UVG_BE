@@ -38,8 +38,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 	Optional<Enrollment> findByUserIdAndEventId(Long userId, Long eventId);
 
 	@Query("SELECT e FROM Enrollment e " + "LEFT JOIN e.course c " + "LEFT JOIN e.event ev "
-			+ "WHERE e.status = 'confirmed' AND " + "( (c.startDate IS NOT NULL AND c.startDate <= :reminderTime) "
-			+ "OR (ev.startDate IS NOT NULL AND ev.startDate <= :reminderTime) )")
+			+ "WHERE e.status = 'confirmed' AND "
+			+ "((c.startDate IS NOT NULL AND c.startDate <= :reminderTime AND c.isVisible = true) "
+			+ "OR (ev.startDate IS NOT NULL AND ev.startDate <= :reminderTime AND ev.isVisible = true))")
 	List<Enrollment> findConfirmedEnrollmentsWithUpcomingEvents(@Param("reminderTime") LocalDateTime reminderTime);
 
 }
